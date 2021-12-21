@@ -63,4 +63,15 @@ class UserController extends Controller
     {
         return User::destroy($id);
     }
+
+    /**
+     * Search for a name and role
+     *
+     * @param  str  $name 
+     * @return \Illuminate\Http\Response
+     */
+    public function search($name)
+    {
+        return User::where('name', 'like', '%' . $name . '%')->get();
+    }
 }
