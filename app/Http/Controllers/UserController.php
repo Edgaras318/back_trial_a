@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -25,7 +26,30 @@ class UserController extends Controller
      */
     public function store()
     {
-        return User::create(request()->all());
+        $fields = request()->validate([
+            'name' => 'required|string',
+            'role' => 'required',
+            'email' => 'required|string|unique:users,email',
+            'password' => 'required|string|confirmed',
+            'phone' => 'string'
+        ]);
+
+        $user = User::create([
+            'name' => $fields['name'],
+            'role' => $fields['role'],
+            'email' => $fields['email'],
+            'phone'  => $fields['phone'],
+            'password'  => bcrypt($fields['password']),
+        ]);
+
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $respone = [
+            'user' => $user,
+            'token' => $token
+        ];
+
+        return response($respone, 201);
     }
 
     /**
@@ -73,5 +97,37 @@ class UserController extends Controller
     public function search($name)
     {
         return User::where('name', 'like', '%' . $name . '%')->get();
+    }
+
+    public function logout()
+    {
+        auth()->user()->tokens()->delete();
+        return [
+            'message' => 'Logged out'
+        ];
+    }
+
+    public function login()
+    {
+        $fields = request()->validate([
+            'email' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $user = User::where('email', $fields['email'])->first();
+
+        // Check password
+        if (!$user || !Hash::check($fields['password'], $user->password)) {
+            return response(['message' => 'Incorrect login credentials'], 401);
+        }
+
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $respone = [
+            'user' => $user->makeHidden(['phone', 'email', 'email_verified_at']),
+            'token' => $token
+        ];
+
+        return response($respone, 200);
     }
 }

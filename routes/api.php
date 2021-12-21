@@ -17,11 +17,16 @@ use Illuminate\Support\Facades\Route;
 
 // Public routes
 Route::post('/register', [UserController::class, 'store']);
+Route::post('/login', [UserController::class, 'login']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/search/{name}', [UserController::class, 'search']);
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::post('/logout', [UserController::class, 'logout']);
     Route::get('/user/{id}', [UserController::class, 'show']);
     Route::delete('/user/{id}', [UserController::class, 'destroy']);
     Route::put('/user/{id}', [UserController::class, 'update']);
+    Route::get('/auth', function () {
+        return auth()->user();
+    });
 });
