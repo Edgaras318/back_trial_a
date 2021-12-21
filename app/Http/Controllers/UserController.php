@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -31,7 +32,7 @@ class UserController extends Controller
             'role' => 'required',
             'email' => 'required|string|unique:users,email',
             'password' => 'required|string|confirmed',
-            'phone' => '',
+            'phone' => 'string'
         ]);
 
         $user = User::create([
@@ -41,6 +42,13 @@ class UserController extends Controller
             'phone'  => $fields['phone'],
             'password'  => bcrypt($fields['password']),
         ]);
+
+        // if (request()->hasFile('picture')) {
+        //     $path = request()->file('picture')->store('images', 's3');
+        //     $imageName = basename($path);
+        //     $user->update(['picture' => $imageName]);
+        //     $user->save();
+        // }
 
         $token = $user->createToken('myapptoken')->plainTextToken;
 
@@ -72,9 +80,38 @@ class UserController extends Controller
      */
     public function update($id)
     {
-        $user = user::find($id);
-        $user->update(request()->all());
-        return $user;
+        request()->validate([
+            'name' => 'required|string',
+            'role' => 'required',
+            'email' => 'required|unique:users,email,' . $id,
+            'phone' => 'string'
+        ]);
+
+        $wizzkid = User::Find($id);
+        $oldImage = $wizzkid->picture;
+
+        // if (request()->picture) {
+
+        //     // if (Storage::disk('s3')->exists($oldImage)) {
+
+        //     //  }
+        //     $path = request()->file('picture')->store('images', 's3');
+        //     $imageName = basename($path);
+        //     $wizzkid->update(request()->all());
+        //     $wizzkid->update(['picture' => $imageName]);
+        //     if ($oldImage) {
+        //         Storage::disk('s3')->delete('images/' . $oldImage);
+        //     }
+        // } else {
+        $wizzkid->update(request()->all());
+        $wizzkid->update(['picture' => $oldImage]);
+        //}
+
+        $response = [
+            'user' => $wizzkid,
+        ];
+
+        return response($response, 200);
     }
 
     /**

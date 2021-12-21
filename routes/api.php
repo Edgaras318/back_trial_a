@@ -20,6 +20,8 @@ Route::post('/register', [UserController::class, 'store']);
 Route::post('/login', [UserController::class, 'login']);
 Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/search/{name}', [UserController::class, 'search']);
+Route::get('/image/{id}', [UserController::class, 'image']);
+
 
 Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('/logout', [UserController::class, 'logout']);
