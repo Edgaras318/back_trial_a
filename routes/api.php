@@ -15,9 +15,13 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('users', UserController::class);
+// Public routes
+Route::post('/register', [UserController::class, 'store']);
+Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/search/{name}', [UserController::class, 'search']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get('/user/{id}', [UserController::class, 'show']);
+    Route::delete('/user/{id}', [UserController::class, 'destroy']);
+    Route::put('/user/{id}', [UserController::class, 'update']);
 });
