@@ -84,11 +84,11 @@ class UserController extends Controller
             'name' => 'required|string',
             'role' => 'required',
             'email' => 'required|unique:users,email,' . $id,
-            'phone' => 'string'
+            'phone' => ''
         ]);
 
         $wizzkid = User::Find($id);
-        $oldImage = $wizzkid->picture;
+        //  $oldImage = $wizzkid->picture;
 
         // if (request()->picture) {
 
@@ -104,12 +104,12 @@ class UserController extends Controller
         //     }
         // } else {
         $wizzkid->update(request()->all());
-        $wizzkid->update(['picture' => $oldImage]);
+        //   $wizzkid->update(['picture' => $oldImage]);
         //}
 
         $response = [
             'user' => $wizzkid,
-        ];
+        ]; //
 
         return response($response, 200);
     }
